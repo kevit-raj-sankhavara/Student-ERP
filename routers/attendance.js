@@ -43,7 +43,6 @@ router.post("/addAttendance", async (req, res) => {
 
 router.get("/checkAttendanceStatus", async (req, res) => {
     const maxDay = await Attendance.find(req.body).sort({ totalDays: -1 });
-    // console.log(maxDay);
     if (maxDay.length === 0) {
         return res.status(404).send("No data found")
     }

@@ -20,6 +20,7 @@ router.post("/addSeatInfo", async (req, res) => {
 });
 
 router.get("/getSeatInfo", async (req, res) => {
+    // const start = new Date();
     const data = await Seats.aggregate([
         {
             $match: { batch: req.body.batch }
@@ -55,6 +56,7 @@ router.get("/getSeatInfo", async (req, res) => {
     ])
 
     res.send(data);
+    // res.send({ data, end: new Date() - start });
 });
 
 module.exports = router;
