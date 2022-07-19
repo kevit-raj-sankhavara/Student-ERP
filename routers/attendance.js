@@ -3,7 +3,7 @@ const router = new express.Router();
 const Attendance = require('../models/attendance');
 
 
-router.get("/getStudentList", async (req, res) => {
+router.get("students/getStudentList", async (req, res) => {
     try {
         const data = await Attendance.find(req.body);
         const studentList = data.map(student => {
@@ -18,7 +18,7 @@ router.get("/getStudentList", async (req, res) => {
     }
 });
 
-router.post("/addAttendance", async (req, res) => {
+router.post("students/addAttendance", async (req, res) => {
     try {
         const total = await Attendance.find({ rollno: req.body.rollno }).sort({ totalDays: -1 });
 
@@ -41,7 +41,7 @@ router.post("/addAttendance", async (req, res) => {
     }
 });
 
-router.get("/checkAttendanceStatus", async (req, res) => {
+router.get("students/checkAttendanceStatus", async (req, res) => {
     const maxDay = await Attendance.find(req.body).sort({ totalDays: -1 });
     if (maxDay.length === 0) {
         return res.status(404).send("No data found")

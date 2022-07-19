@@ -2,7 +2,7 @@ const express = require('express');
 const router = new express.Router();
 const Seats = require('../models/seatsinfo');
 
-router.post("/addSeatInfo", async (req, res) => {
+router.post("seats/addSeatInfo", async (req, res) => {
     try {
         let seat = await Seats.findOne({ batch: req.body.batch });
 
@@ -19,7 +19,7 @@ router.post("/addSeatInfo", async (req, res) => {
     }
 });
 
-router.get("/getSeatInfo", async (req, res) => {
+router.get("seats/getSeatInfo", async (req, res) => {
     // const start = new Date();
     const data = await Seats.aggregate([
         {
