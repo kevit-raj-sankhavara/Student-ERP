@@ -1,24 +1,21 @@
 const express = require('express');
 const router = new express.Router();
 const Attendance = require('../models/attendance');
+const Student = require('../models/student');
 
-
-router.get("students/getStudentList", async (req, res) => {
+router.get("/attendance/getAbsentStudents", async (req, res) => {
+    const { date, present } = req.body;
     try {
-        const data = await Attendance.find(req.body);
-        const studentList = data.map(student => {
-            return ({
-                name: student.studentname,
-                rollno: student.rollno
-            });
-        })
-        res.send(studentList);
+        const data = await Attendance.find({ date, present });
+        const rollNums = data.map(student => { return student.rollno });
+        const studentsList = await Student.find({ rollno: { $in: rollNums } });
+        res.send(studentsList);
     } catch (error) {
         res.status(404).send("No data found");
     }
 });
 
-router.post("students/addAttendance", async (req, res) => {
+router.post("/attendance/addAttendance", async (req, res) => {
     try {
         const total = await Attendance.find({ rollno: req.body.rollno }).sort({ totalDays: -1 });
 
@@ -41,7 +38,7 @@ router.post("students/addAttendance", async (req, res) => {
     }
 });
 
-router.get("students/checkAttendanceStatus", async (req, res) => {
+router.get("/attendance/checkAttendanceStatus", async (req, res) => {
     const maxDay = await Attendance.find(req.body).sort({ totalDays: -1 });
     if (maxDay.length === 0) {
         return res.status(404).send("No data found")
@@ -49,18 +46,18 @@ router.get("students/checkAttendanceStatus", async (req, res) => {
 
     const totaldays = maxDay[0].totalDays;
 
-    const Data = maxDay
+    const rollNums = maxDay
         .filter(student => {
-            return (student.totalDays === totaldays && student.attendancePR >= req.body.attendance)
-        })
-        .map(student => {
-            return ({
-                name: student.studentname,
-                rollno: student.rollno,
-                attendance: student.attendancePR
-            })
-        });
-    res.send(Data);
+            return (student.totalDays === totaldays && student.attendancePR < req.body.attendance)
+        }).map(student => student.rollno);
+
+    const studentsList = await Student.find({ rollno: { $in: rollNums } });
+    res.send(studentsList);
+});
+
+router.get("/attendance/getAttData", async (req, res) => {
+    const total = await Attendance.find().sort({ totalDays: -1 });
+    res.send(total);
 })
 
 module.exports = router;
