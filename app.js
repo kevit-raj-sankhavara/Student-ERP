@@ -3,6 +3,8 @@ require("./db/mongoose");
 const Batches = require('./models/batches');
 const attendanceRouter = require("./routers/attendance");
 const seatRouter = require("./routers/seatsinfo");
+const studentRouter = require("./routers/student");
+const superuserRouter = require("./routers/superuser");
 const cors = require("cors");
 
 const app = express();
@@ -14,6 +16,8 @@ app.use(cors({
 
 app.use(attendanceRouter);
 app.use(seatRouter);
+app.use(studentRouter);
+app.use(superuserRouter);
 
 app.get("/", async (req, res) => {
     const batches = await Batches.aggregate([
