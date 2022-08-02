@@ -20,7 +20,15 @@ router.get("/attendance/getAbsentStudents", auth, async (req, res) => {
 
 router.post("/attendance/addAttendance", auth, async (req, res) => {
     try {
-        const total = await Attendance.find({ rollno: req.body.rollno }).sort({ totalDays: -1 });
+        let total;
+        const isStudentExists = await Attendance.findOne({ rollno: req.body.rollno });
+        if (!isStudentExists) {
+            total = await Attendance.find().sort({ totalDays: -1 });
+            if (total.length > 0)
+                total[0].presentCount = total[0].totalDays;
+        }
+        else
+            total = await Attendance.find({ rollno: req.body.rollno }).sort({ totalDays: -1 });
 
         req.body.totalDays = (total.length === 0) ? 1 : total[0].totalDays + 1;
 

@@ -10,7 +10,9 @@ router.post("/student/addStudent", auth, async (req, res) => {
         await student.save();
         res.send({ success: true, student });
     } catch (error) {
-        res.status(500).send(error);
+        if (error.code === 11000)
+            return res.status(400).send("User already exists");
+        return res.status(500).send(error);
     }
 })
 
