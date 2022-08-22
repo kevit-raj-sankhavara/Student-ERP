@@ -33,7 +33,7 @@ router.post("/staff/addStaffMember", auth, async (req, res) => {
     }
 })
 
-router.post("/staff/login", async (req, res) => {
+router.post("/superUser/login", async (req, res) => {
     try {
         const user = await Superuser.findByCredentials(req.body.email, req.body.password);
         const token = await user.generateAuthToken();

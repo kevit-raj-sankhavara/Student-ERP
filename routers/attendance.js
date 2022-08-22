@@ -20,15 +20,7 @@ router.get("/attendance/getAbsentStudents", auth, async (req, res) => {
 
 router.post("/attendance/addAttendance", auth, async (req, res) => {
     try {
-        let total;
-        const isStudentExists = await Attendance.findOne({ rollno: req.body.rollno });
-        if (!isStudentExists) {
-            total = await Attendance.find().sort({ totalDays: -1 });
-            if (total.length > 0)
-                total[0].presentCount = total[0].totalDays;
-        }
-        else
-            total = await Attendance.find({ rollno: req.body.rollno }).sort({ totalDays: -1 });
+        let total = await Attendance.find({ rollno: req.body.rollno }).sort({ totalDays: -1 });
 
         req.body.totalDays = (total.length === 0) ? 1 : total[0].totalDays + 1;
 
@@ -50,20 +42,23 @@ router.post("/attendance/addAttendance", auth, async (req, res) => {
 });
 
 router.get("/attendance/checkAttendanceStatus", auth, async (req, res) => {
-    const maxDay = await Attendance.find(req.body).sort({ totalDays: -1 });
+    const { batch, branch, sem } = req.body;
+    const students = await Student.find({ batch, branch, sem });
+
+    const rollNums = students.map(student => student.rollno);
+
+    const maxDay = await Attendance.find({ rollno: { $in: rollNums } }).sort({ totalDays: -1 });
     if (maxDay.length === 0) {
         return res.status(404).send("No data found")
     }
 
     const totaldays = maxDay[0].totalDays;
 
-    const rollNums = maxDay
+    const studentsList = maxDay
         .filter(student => {
             return (student.totalDays === totaldays && student.attendancePR < req.body.attendance)
         }).map(student => student.rollno);
 
-    const { batch, branch, sem } = req.body;
-    const studentsList = await Student.find({ rollno: { $in: rollNums }, batch, branch, sem });
     if (studentsList.length === 0)
         return res.send("No Student Found");
     res.send(studentsList);
